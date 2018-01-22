@@ -5,7 +5,7 @@ from btc_testbed.docker_utils import get_containers_names
 from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
 
 
-def rpc_test_connection(client, rpc_server, rpc_user=BTC_RPC_USER, rpc_password=BTC_RPC_PASSWD, rpc_port=BTC_RPC_PORT):
+def rpc_getinfo(client, rpc_server, rpc_user=BTC_RPC_USER, rpc_password=BTC_RPC_PASSWD, rpc_port=BTC_RPC_PORT):
     """
     Tests a rpc connection to a given container.
     :param client: docker client
@@ -20,6 +20,23 @@ def rpc_test_connection(client, rpc_server, rpc_user=BTC_RPC_USER, rpc_password=
         # Test connection by sendinf a getinfo command
         rpc_connection = AuthServiceProxy("http://%s:%s@%s:%s" % (rpc_user, rpc_password, rpc_server, rpc_port))
         get_info = rpc_connection.getinfo()
+        return get_info
+    except JSONRPCException as err:
+        return False
+
+
+def rpc_test_connection(client, rpc_server, rpc_user=BTC_RPC_USER, rpc_password=BTC_RPC_PASSWD, rpc_port=BTC_RPC_PORT):
+    """
+    Tests a rpc connection to a given container.
+    :param client: docker client
+    :param rpc_server: container IP (with bitcoind running)
+    :param rpc_user: bitcoind rpc user
+    :param rpc_password: bitcoind rpc password
+    :param rpc_port: bitcoind rpc port
+    :return: boolean, whether the connection was successful
+    """
+    try:
+        get_info = rpc_getinfo(client, rpc_server, rpc_user=rpc_user, rpc_password=rpc_password, rpc_port=rpc_port)
         print get_info
         return True
     except JSONRPCException as err:
@@ -92,6 +109,7 @@ def rpc_call(client, rpc_server, call, arguments=None,
         r = eval("rpc_connection." + call + args)
         return r
     except JSONRPCException as err:
+        print err
         return False
 
 
