@@ -139,7 +139,7 @@ def create_network(client, network_name=DOCK_NETWORK_NAME, subnetwork=DOCK_NETWO
         ipam_config = docker.types.IPAMConfig(pool_configs=[ipam_pool])
         client.networks.create(network_name, driver="bridge", ipam=ipam_config)
     except docker.errors.APIError as err:
-        logging.info("Warning: Network already exists")
+        logging.info("    Warning: Network already exists")
 
 
 

@@ -16,7 +16,7 @@ def create_basic_scenario(client):
     """
 
     logging.info("Creating basic scenario")
-    logging.info("  Creating new nodes")
+    logging.info("  Creating 2 new nodes")
     run_new_nodes(client, 2)
 
     logging.info("  Getting info about existing nodes")
@@ -38,8 +38,8 @@ def create_basic_scenario(client):
     logging.info("  Checking the connection")
     p1 = rpc_getpeerinfo(client, "btc_n1")
     p2 = rpc_getpeerinfo(client, "btc_n2")
-    logging.info(p1)
-    logging.info(p2)
+    logging.info("    " + str(p1))
+    logging.info("    " + str(p2))
 
 
 def create_scenario_from_graph(client, graph_file):
@@ -71,20 +71,16 @@ def create_scenario_from_graph(client, graph_file):
     time.sleep(5)
 
     for edge in g.edges():
-        print edge
         source = DOCK_CONTAINER_NAME_PREFIX + str(edge[0])
         dest = DOCK_CONTAINER_NAME_PREFIX + str(edge[1])
         r = rpc_create_connection(client, source, dest)
-        print r
 
     time.sleep(5)
 
     logging.info("  I have created {} nodes".format(len(get_containers_names(client))))
 
-    p0 = rpc_getpeerinfo(client, "btc_n0")
-    p1 = rpc_getpeerinfo(client, "btc_n1")
-    p2 = rpc_getpeerinfo(client, "btc_n2")
-    num_connections = (len(p0) + len(p1) + len(p2))/2
+    containers = get_containers_names(client)
+    num_connections = sum([len(rpc_getpeerinfo(client, c)) for c in containers])/2
     logging.info("  I have created {} connections".format(num_connections))
 
     return
@@ -119,7 +115,7 @@ def docker_setup(build_image=True, create_docker_network=True, remove_existing=T
 if __name__ == '__main__':
 
     # Configure logging
-    logging.basicConfig(format='%(asctime)s %(name)s: %(message)s', level=logging.DEBUG, handlers=[
+    logging.basicConfig(format='%(asctime)s %(name)s: %(message)s', level=logging.INFO, handlers=[
         logging.FileHandler(LOG_FILE),
         logging.StreamHandler()
     ])
@@ -134,4 +130,4 @@ if __name__ == '__main__':
 
     # Scenario from graph: gets topology from graph
     create_scenario_from_graph(client, TEST_GRAPH_FILE_1)
-
+    
