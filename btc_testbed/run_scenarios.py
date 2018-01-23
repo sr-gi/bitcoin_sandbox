@@ -88,6 +88,70 @@ def create_scenario_from_graph(client, graph_file):
     return
 
 
+def run_scenario_vic1(client):
+
+    ########################################
+    # PART 1
+    ########################################
+
+    # Create scenario from graph
+    create_scenario_from_graph(client, "./graphs/basic4.graphml")
+
+    # Show node 0 balance and block info
+    blocks_0_prev = rpc_getinfo(client, "btc_n0")["blocks"]
+    balance_0_prev = rpc_call(client, "btc_n0", "getbalance")
+    logging.info("  Node 0 is aware of {} blocks and has a balance of {} tbtc".format(blocks_0_prev, balance_0_prev))
+
+    # Node 0 mines 101 blocks
+    logging.info("  Node 0 is mining...")
+    generate_0 = rpc_call(client, "btc_n0", "generate", arguments="101")
+
+    # Show node 0 balance and block info
+    blocks_0_after = rpc_getinfo(client, "btc_n0")["blocks"]
+    balance_0_after = rpc_call(client, "btc_n0", "getbalance")
+    logging.info("  Node 0 is aware of {} blocks and has a balance of {} tbtc".format(blocks_0_after, balance_0_after))
+
+    # Show node 3 block info
+    blocks_3 = rpc_getinfo(client, "btc_n3")["blocks"]
+    logging.info("  Node 3 is aware of {} blocks".format(blocks_3))
+
+    ########################################
+    # PART 2
+    ########################################
+
+    # Print current connections
+    logging.info("  btc_n0 has peers: {}".format(rpcp_get_peer_ips(client, "btc_n0")))
+    logging.info("  btc_n1 has peers: {}".format(rpcp_get_peer_ips(client, "btc_n1")))
+    logging.info("  btc_n2 has peers: {}".format(rpcp_get_peer_ips(client, "btc_n2")))
+    logging.info("  btc_n3 has peers: {}".format(rpcp_get_peer_ips(client, "btc_n3")))
+
+    # Connection between 2 and 3 dissapears
+    logging.info("  Disconnecting nodes 2 and 3...")
+    #disconnect = rpc_call(client, "btc_n2", "addnode", arguments="'172.192.1.4', 'remove'")
+    disconnect = rpc_call(client, "btc_n2", "disconnectnode", arguments="'172.192.1.4'")
+    time.sleep(5)
+
+    # Print current connections
+    logging.info("  btc_n0 has peers: {}".format(rpcp_get_peer_ips(client, "btc_n0")))
+    logging.info("  btc_n1 has peers: {}".format(rpcp_get_peer_ips(client, "btc_n1")))
+    logging.info("  btc_n2 has peers: {}".format(rpcp_get_peer_ips(client, "btc_n2")))
+    logging.info("  btc_n3 has peers: {}".format(rpcp_get_peer_ips(client, "btc_n3")))
+
+    # Node 0 mines a block
+    generate_0 = rpc_call(client, "btc_n0", "generate", arguments="1")
+    blocks_0_dis = rpc_getinfo(client, "btc_n0")["blocks"]
+    logging.info("  Node 0 is aware of {} blocks".format(blocks_0_dis))
+    blocks_2_dis = rpc_getinfo(client, "btc_n2")["blocks"]
+    logging.info("  Node 2 is aware of {} blocks".format(blocks_2_dis))
+    blocks_3_dis = rpc_getinfo(client, "btc_n3")["blocks"]
+    logging.info("  Node 3 is aware of {} blocks".format(blocks_3_dis))
+
+    ########################################
+    # PART 3 - Let's create a fork!
+    ########################################
+
+
+
 def docker_setup(build_image=True, create_docker_network=True, remove_existing=True):
     """
     Creates the docker client and optionally:
@@ -143,4 +207,4 @@ if __name__ == '__main__':
 
     # Scenario from graph: gets topology from graph
     create_scenario_from_graph(client, TEST_GRAPH_FILE_1)
-    
+
