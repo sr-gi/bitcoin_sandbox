@@ -44,21 +44,17 @@ def create_basic_scenario(client):
     logging.info("    " + str(p2))
 
 
-def create_scenario_from_graph(client, graph_file):
+def create_scenario_from_graph(client, g):
     """
-    Creates a network with the topology extracted from a graphml file.
+    Creates a network with the topology extracted from a graph.
 
     Warning: remember to call docker_setup with remove_existing=True or to set the names of the nodes so that they
     do not overlap with existing ones.
 
     :param client: docker client
-    :param graph_file: .graphml file with the network topology
+    :param g: networkx graph
     :return:
     """
-
-    logging.info("Creating scenario from graph file")
-
-    g = nx.read_graphml(graph_file, node_type=int)
 
     # Plot graph
     # nx.draw(g)
@@ -88,6 +84,37 @@ def create_scenario_from_graph(client, graph_file):
     return
 
 
+def create_scenario_from_graph_file(client, graph_file):
+    """
+    Creates a network with the topology extracted from a graphml file.
+
+    Warning: remember to call docker_setup with remove_existing=True or to set the names of the nodes so that they
+    do not overlap with existing ones.
+
+    :param client: docker client
+    :param graph_file: .graphml file with the network topology
+    :return:
+    """
+    logging.info("Creating scenario from graph file")
+    g = nx.read_graphml(graph_file, node_type=int)
+    create_scenario_from_graph(client, g)
+
+
+def create_scenario_from_er_graph(client, num_nodes, p):
+    """
+    Creates a random network using an erdos-renyi model.
+
+    :param client: docker client
+    :param num_nodes: number of nodes
+    :param p: probability of a connection to be created
+    :return:
+    """
+
+    g = nx.erdos_renyi_graph(num_nodes, p, directed=True)
+    logging.info("Creating scenario with a random topology: {} nodes and {} edges".format(num_nodes, g.number_of_edges()))
+    create_scenario_from_graph(client, g)
+
+
 def run_scenario_vic1(client):
 
     ########################################
@@ -95,7 +122,7 @@ def run_scenario_vic1(client):
     ########################################
 
     # Create scenario from graph
-    create_scenario_from_graph(client, "./graphs/basic4.graphml")
+    create_scenario_from_graph_file(client, "./graphs/basic4.graphml")
 
     # Show node 0 balance and block info
     blocks_0_prev = rpc_getinfo(client, "btc_n0")["blocks"]
@@ -178,6 +205,7 @@ def docker_setup(build_image=True, create_docker_network=True, remove_existing=T
         remove_containers(client)
     return client
 
+
 if __name__ == '__main__':
 
     if len(argv) > 1:
@@ -206,5 +234,9 @@ if __name__ == '__main__':
     # create_basic_scenario(client)
 
     # Scenario from graph: gets topology from graph
-    create_scenario_from_graph(client, TEST_GRAPH_FILE_1)
+    # create_scenario_from_graph_file(client, TEST_GRAPH_FILE_1)
 
+    # Scenario from a random graph:
+    create_scenario_from_er_graph(client, 5, 0.3)
+
+    #run_scenario_vic1(client)
