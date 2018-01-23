@@ -62,6 +62,21 @@ def rpc_getpeerinfo(client, rpc_server, rpc_user=BTC_RPC_USER, rpc_password=BTC_
         return False
 
 
+def rpcp_get_peer_ips(client, rpc_server, rpc_user=BTC_RPC_USER, rpc_password=BTC_RPC_PASSWD, rpc_port=BTC_RPC_PORT):
+    """
+    Returns a list of ips addresses of the peers connected to the node, together with a boolean indicating
+    in the connection is inboud.
+    :param client: docker client
+    :param rpc_server: container IP (with bitcoind running)
+    :param rpc_user: bitcoind rpc user
+    :param rpc_password: bitcoind rpc password
+    :param rpc_port: bitcoind rpc port
+    :return: list of tuples, each tuple has (IP, inbound?)
+    """
+    peerinfo = rpc_getpeerinfo(client, rpc_server, rpc_user=rpc_user, rpc_password=rpc_password, rpc_port=rpc_port)
+    return [(peer["addr"], peer["inbound"]) for peer in peerinfo]
+
+
 def rpc_create_connection(client, source, dest,
                           rpc_user=BTC_RPC_USER, rpc_password=BTC_RPC_PASSWD, rpc_port=BTC_RPC_PORT):
     """
