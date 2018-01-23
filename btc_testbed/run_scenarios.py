@@ -6,6 +6,8 @@ import logging
 import time
 import networkx as nx
 import matplotlib.pyplot as plt
+from sys import argv
+from getopt import getopt
 
 
 def create_basic_scenario(client):
@@ -114,6 +116,17 @@ def docker_setup(build_image=True, create_docker_network=True, remove_existing=T
 
 if __name__ == '__main__':
 
+    if len(argv) > 1:
+        # Get params from call
+        _, args = getopt(argv, ['nobuild', 'nonet'])
+        build = False if '--nobuild' in args else True
+        network = False if '--nonet' in args else True
+        remove = False if '--noremove' in args else True
+    else:
+        build = True
+        network = True
+        remove = True
+
     # Configure logging
     logging.basicConfig(format='%(asctime)s %(name)s: %(message)s', level=logging.INFO, handlers=[
         logging.FileHandler(LOG_FILE),
@@ -121,7 +134,7 @@ if __name__ == '__main__':
     ])
 
     # Create docker client & network
-    client = docker_setup()
+    client = docker_setup(build_image=build, create_docker_network=network, remove_existing=remove)
 
     # Create a scenario
 
