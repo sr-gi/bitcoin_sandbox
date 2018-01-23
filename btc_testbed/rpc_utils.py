@@ -1,7 +1,6 @@
 from btc_testbed.run_scenarios import get_ip_by_unknown
 from btc_testbed.conf import *
-from btc_testbed.docker_utils import get_containers_names
-
+from btc_testbed.docker_utils import get_containers_names, get_container_name_by_ip
 from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
 
 
@@ -74,7 +73,17 @@ def rpcp_get_peer_ips(client, rpc_server, rpc_user=BTC_RPC_USER, rpc_password=BT
     :return: list of tuples, each tuple has (IP, inbound?)
     """
     peerinfo = rpc_getpeerinfo(client, rpc_server, rpc_user=rpc_user, rpc_password=rpc_password, rpc_port=rpc_port)
-    return [(peer["addr"], peer["inbound"]) for peer in peerinfo]
+
+    peer_ips = []
+
+    for peer in peerinfo:
+        if peer['inbound']:
+            peer_ip, peer_port = str.split(str(peer['addr']), ':')
+            peer_ips.append((peer_ip, peer["inbound"]))
+        else:
+            peer_ips.append((peer["addr"], peer["inbound"]))
+
+    return peer_ips
 
 
 def rpc_create_connection(client, source, dest,
@@ -153,3 +162,25 @@ def rpc_call_to_all(client, call, prefix=DOCK_CONTAINER_NAME_PREFIX, arguments=N
         return r
     except JSONRPCException as err:
         return False
+
+
+def rpcp_get_network_topology(client):
+    """
+    Gets the network topology as a dict.
+    :param client: docker client
+    :return: Network topology
+    """
+
+    # Initialize topology dictionary and get container names.
+    net_topology = {}
+    containers = map(str, get_containers_names(client))
+
+    for container in containers:
+        net_topology[container] = []
+        # For each container get the list of peer ips.
+        for ip, inbound in rpcp_get_peer_ips(client, container):
+            peer_name = get_container_name_by_ip(client, ip)
+            # Add the id as a peer specifying whether the connection is inbound or not
+            net_topology[container].append((peer_name, inbound))
+
+    return net_topology

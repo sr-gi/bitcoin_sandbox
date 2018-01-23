@@ -142,7 +142,25 @@ def create_network(client, network_name=DOCK_NETWORK_NAME, subnetwork=DOCK_NETWO
         logging.info("    Warning: Network already exists")
 
 
+def get_container_name_by_ip(client, ip, network_name=DOCK_NETWORK_NAME):
+    """
+    Returns the ip of a given container (from its name)
+    :param client: docker client
+    :param ip: ip address
+    :param network_name: docker network name
+    :return: docker container name if found, False otherwise.
+    """
 
+    # Sanity check IP formatting
+    assert is_valid_ip(ip)
 
+    # Get all the containers connected to the network
+    containers = client.networks.get(network_name).containers
 
+    # For each of the containers get the ip by name and check it with the provided ip.
+    cont_name = False
+    for container in containers:
+        if ip == get_ip_by_container_name(client, container.name):
+            cont_name = str(container.name)
 
+    return cont_name
