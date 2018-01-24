@@ -73,15 +73,15 @@ def rpcp_get_peer_ips(client, rpc_server, rpc_user=BTC_RPC_USER, rpc_password=BT
     :return: list of tuples, each tuple has (IP, inbound?)
     """
     peerinfo = rpc_getpeerinfo(client, rpc_server, rpc_user=rpc_user, rpc_password=rpc_password, rpc_port=rpc_port)
-
     peer_ips = []
 
     for peer in peerinfo:
-        if peer['inbound']:
+        if ':' in peer['addr']:
             peer_ip, peer_port = str.split(str(peer['addr']), ':')
-            peer_ips.append((peer_ip, peer["inbound"]))
         else:
-            peer_ips.append((peer["addr"], peer["inbound"]))
+            peer_ip = peer["addr"]
+        
+        peer_ips.append((peer_ip, peer["inbound"]))
 
     return peer_ips
 
