@@ -66,7 +66,7 @@ def get_ip_by_container_name(client, container_name, network_name=DOCK_NETWORK_N
     except docker.errors.NotFound as err:
         return False
 
-    return container.attrs['NetworkSettings']['Networks'][network_name]['IPAddress']
+    return str(container.attrs['NetworkSettings']['Networks'][network_name]['IPAddress'])
 
 
 def is_valid_ip(addr):
