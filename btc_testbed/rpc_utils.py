@@ -1,8 +1,7 @@
-from btc_testbed.run_scenarios import get_ip_by_unknown
 from btc_testbed.conf import *
-from btc_testbed.docker_utils import get_containers_names, get_container_name_by_ip
+from btc_testbed.docker_utils import *
 from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
-
+import networkx as nx
 
 def rpc_getinfo(client, rpc_server, rpc_user=BTC_RPC_USER, rpc_password=BTC_RPC_PASSWD, rpc_port=BTC_RPC_PORT):
     """
@@ -79,7 +78,7 @@ def rpcp_get_peer_ips(client, rpc_server, rpc_user=BTC_RPC_USER, rpc_password=BT
         if ':' in peer['addr']:
             peer_ip, peer_port = str.split(str(peer['addr']), ':')
         else:
-            peer_ip = peer["addr"]
+            peer_ip = str(peer["addr"])
         
         peer_ips.append((peer_ip, peer["inbound"]))
 
@@ -162,25 +161,58 @@ def rpc_call_to_all(client, call, prefix=DOCK_CONTAINER_NAME_PREFIX, arguments=N
         return r
     except JSONRPCException as err:
         return False
-
-
-def rpcp_get_network_topology(client):
+    
+def rpcp_get_network_topology(client, mode='ip', out_format='graph', exclude=None):
     """
     Gets the network topology as a dict.
     :param client: docker client
+    :param mode: Whether identifying the peer by its name or ip.
+    :param out_format: Whether the return format is text of a graph
+    :param exclude: Whether to exclude any node from the topology.
     :return: Network topology
     """
 
-    # Initialize topology dictionary and get container names.
-    net_topology = {}
+    # Sanity checks
+    assert mode in ['ip', 'IP', 'name', 'id'], 'Supported modes are ip ("ip" or "IP") and container name("name").'
+    assert out_format in ['text', 'graph'], 'Supported formats are "text" and "graph"'
+    if exclude and not isinstance(exclude, list):
+        exclude = [exclude]
+
+    # Initialize the container identifier (name or ip) depending on the mode
     containers = map(str, get_containers_names(client))
 
+    # Remove excluded nodes
+    if exclude:
+        for node in exclude:
+            if node in containers:
+                containers.remove(node)
+
+    if mode in ['ip', 'IP']:
+        containers = [get_ip_by_container_name(client, container) for container in containers]
+
+    # Initialize the net_topology structure depending on the out_format
+    if out_format == 'graph':
+        net_topology = nx.Graph()
+    else:
+        net_topology = {}
+        for container in containers:
+            net_topology[container] = []
+
     for container in containers:
-        net_topology[container] = []
         # For each container get the list of peer ips.
         for ip, inbound in rpcp_get_peer_ips(client, container):
-            peer_name = get_container_name_by_ip(client, ip)
-            # Add the id as a peer specifying whether the connection is inbound or not
-            net_topology[container].append((peer_name, inbound))
+            # Identify the peer depending on the mode (ip or name)
+            if mode == 'name':
+                peer = get_container_name_by_ip(client, ip)
+            else:
+                peer = ip
+
+            # Add an edge between the container and the peer depending on the out_format.
+            if peer not in exclude:
+                if out_format == 'graph':
+                    net_topology.add_edge(container, peer)
+
+                else:
+                    net_topology[container].append((peer, inbound))
 
     return net_topology
