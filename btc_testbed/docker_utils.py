@@ -112,7 +112,7 @@ def run_new_node(client, network_name=DOCK_NETWORK_NAME, node_num=None):
         name = DOCK_CONTAINER_NAME_PREFIX + str(node_num)
         port = {'18332/tcp': 22000 + node_num}
 
-    containers.run(DOCK_IMAGE_NAME, "bitcoind", name=name, ports=port, detach=True, network=network_name)
+    containers.run(DOCK_IMAGE_NAME, "bitcoind -debug", name=name, ports=port, detach=True, network=network_name)
     # containers.run("amacneil/bitcoin", "bitcoind", name=name, ports=port, detach=True, network=network_name)
 
 

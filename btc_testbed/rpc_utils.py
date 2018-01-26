@@ -3,6 +3,7 @@ from btc_testbed.docker_utils import *
 from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
 import networkx as nx
 
+
 def rpc_getinfo(client, rpc_server, rpc_user=BTC_RPC_USER, rpc_password=BTC_RPC_PASSWD, rpc_port=BTC_RPC_PORT):
     """
     Tests a rpc connection to a given container.
@@ -161,7 +162,8 @@ def rpc_call_to_all(client, call, prefix=DOCK_CONTAINER_NAME_PREFIX, arguments=N
         return r
     except JSONRPCException as err:
         return False
-    
+
+
 def rpcp_get_network_topology(client, mode='ip', out_format='graph', exclude=None):
     """
     Gets the network topology as a dict.

@@ -4,4 +4,5 @@ base58
 pyasn1
 bitcoin
 httplib2
+networkx
 python-bitcoinrpc

@@ -1,7 +1,6 @@
 from btc_testbed.rpc_utils import *
 from btc_testbed.docker_utils import *
 from btc_testbed.conf import *
-
 import logging
 import time
 import networkx as nx
@@ -178,7 +177,6 @@ def run_scenario_vic1(client):
     ########################################
 
 
-
 def docker_setup(build_image=True, create_docker_network=True, remove_existing=True):
     """
     Creates the docker client and optionally:
@@ -234,9 +232,9 @@ if __name__ == '__main__':
     # create_basic_scenario(client)
 
     # Scenario from graph: gets topology from graph
-    # create_scenario_from_graph_file(client, TEST_GRAPH_FILE_1)
+    create_scenario_from_graph_file(client, TEST_GRAPH_FILE_1)
 
     # Scenario from a random graph:
-    create_scenario_from_er_graph(client, 5, 0.3)
+    # create_scenario_from_er_graph(client, 5, 0.3)
 
-    #run_scenario_vic1(client)
+    # run_scenario_vic1(client)
