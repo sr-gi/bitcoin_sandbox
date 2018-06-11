@@ -1,93 +1,77 @@
 # Bitcoin test environment guide
 
-## Deployment
+btc_testbed is a dockerized environment to create bitcoin networks for educational and research purposes. 
+Docker containers are used to run bitcoin nodes (with bitcoind), which are in turn connected within each other 
+to create the P2P network.
 
-### Create the test environment image
+The tool allows three different alternatives to specify the connections between each node (that is, the Bitcoin network): 
+* Deterministically, by manually specifying the connections in the source code.
+* Deterministically, by loading a graph file that describes the connections.
+* Randomly, by generating an erdos renyi graph with the given parameters (number of nodes and probability of creating
+a connection between any two nodes). 
 
-From the btc_testbed directory run:
+## Installation
 
-`docker build -t btc_testbed .`
+1. Download / clone the repository.
+2. Copy / rename `sample_conf.py` to `conf.py`. You can leave the default configuration values or tune them 
+ to adjust your preferences. 
+3. Install all the dependencies (`pip install -r requirements.txt`).
 
-### Create nodes (by deploying docker containers)
-`docker run -dit --name btc_nN bitcoind`
+## Running the testbed
 
-replace `nN` with the name of the node (n1, n2, n3, etc.). 
+Once installed, you can run the testbed with:
 
-## Execution
+`python run_scenarios.py`
+
+Three basic scenarios, that demonstrate the three network creation alternatives are provided:
+```
+# Basic scenario: 2 nodes with 1 connection
+# create_basic_scenario(client)
+```
+
+```
+# Scenario from graph: gets topology from graph
+create_scenario_from_graph_file(client, TEST_GRAPH_FILE_1)
+```
+
+```
+# Scenario from a random graph:
+# create_scenario_from_er_graph(client, 5, 0.3)
+```
+
+By default, `btc_testbed` will run a scenario where the network is loaded from a graph file. The scenario contains only three
+Bitcoin nodes, connected as shown in the picture:
+
+![3 node graph](graphs/basic3.png)
+
+That is, there will be a connection from node 0 to 1 (created by node 0), and node 2 will have no connections.
+
+A fourth more complex scenario is also provided (`run_scenario_vic1`), where once the network has been created, 
+nodes start to mine and to propagate blocks through the network. Disconnections also happen, and thus the network
+changes during the execution of the scenario. 
+
+## Connecting to the containers
+
+Running containers can be seen also from docker:
+
+`docker ps`
+
+(container names will be, by default, `btc_ni`, with i an integer denoting their id).
 
 ### Log into a container
 
-`docker exec -it btc_nM bash`
+You can execute bash inside one of the containers with:
+
+`docker exec -it btc_ni /bin/bash`
+
+(or `/bin/ash` for `alpine` based docker images).
 
 ### Run an RPC command
 
-To execute an RPC command to node `N` we will run:
+You cal also directly connect to a running bitcoind with RPC:
 
-`bitcoin-cli -rpcconnect=172.17.0.2+N command`
+`bitcoin-cli -rpcconnect=172.17.0.1+i command`
 
-If your bitcoin.conf file is not set in the default directory in your host machine you may need to specify the location when running `bitcoin-cli`:
-
-`bitcoin-cli -conf=path_to_conffile -rpcconnect=172.17.0.2+N command`
-
-### Connect two nodes
-
-If we want to connect node `nA` with node `nB`, we will run either:
-
-`bitcoin-cli -rpcconnect=172.17.0.2+A addnode ip_nB onetry`
-
-or
-
-`bitcoin-cli -rpcconnect=172.17.0.2+B addnode ip_nA onetry`
-
-### Disconnect two nodes
-
-To disconnect node `nA` from node `nB` we can either run:
-
-`bitcoin-cli -rpcconnect=172.17.0.2+A disconnectnode ip_nB`
-
-or
-
-`bitcoin-cli -rpcconnect=172.17.0.2+B disconnectnode ip_nA`
-
-### Get network info
-
-If we want to obtain the network information of a certain node `nC` (to check for example the number of peers of the given node) we can run:
-
-`bitcoin-cli -rpcconnect=172.17.0.2+C getnetworkinfo`
-
-### Get peers info
-
-Same as before but for extended information about the peers:
-
-`bitcoin-cli -rpcconnect=172.17.0.2+C getpeerinfo`
-
-## Tools
-
-We can use `create_node` tool to easily create a node by running:
-
-`./create_node N`
-
-Where N will be the identifier of the node, that it, the node will be called `btc_nN`.
-
-## Build the network
-
-### Create a seed node
-
-We start by creating a seed node to whom every other node is going to be connected. The reason behind that will be explained later on.
-
-`docker run -dit --name btc_seed btc_testbed`
-
-### Generate an address we control
-
-Now, we will generate 101 blocks in that node to an address we control. We can create it using `bitcoin_tools` (`python key_management.py`). In our case we are going to use the address `msfBL8TMzx1BSE9kTa1ThFJ3HjoAcPUSq3` that we have previously created.
-
-### Generate 101 blocks to that address
-
-`bitcoin-cli -rpcconnect=172.17.0.2 generatetoaddress 101 msfBL8TMzx1BSE9kTa1ThFJ3HjoAcPUSq3`
-
-This address now holds the reward of 101 blocks (we will be able to use only the reward of the first one to create transactions since 100 blocks have to be waited before the coinbase transaction of a block can be redeemed). Moreover, we have one node that is aware of all the 101 blocks generated so far. This node will act as a seed for the initial blockchain state. We will connect every new generated node to the seed in order to bootstrap node easily.
-
-While a traditional permissionless blockchain should never be bootstrap like that, this makes complete sense for the type of experiments we aim to run. Later on, we will need to send several transactions to the whole network, so a shared state in required with some address holding value.
 
 
 
