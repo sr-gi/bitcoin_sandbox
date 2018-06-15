@@ -1,6 +1,8 @@
-# Bitcoin test environment guide
+![bitcoin_tools](https://srgi.me/assets/images/bitcoin_sandbox_logo.png)
 
-btc_testbed is a dockerized environment to create bitcoin networks for educational and research purposes. 
+# Bitcoin sandbox guide
+
+bitcoin_sandbox is a dockerized environment to create bitcoin networks for educational and research purposes. 
 Docker containers are used to run bitcoin nodes (with bitcoind), which are in turn connected within each other 
 to create the P2P network.
 
@@ -39,7 +41,7 @@ create_scenario_from_graph_file(client, TEST_GRAPH_FILE_1)
 # create_scenario_from_er_graph(client, 5, 0.3)
 ```
 
-By default, `btc_testbed` will run a scenario where the network is loaded from a graph file. The scenario contains only three
+By default, `bitcoin_sandbox` will run a scenario where the network is loaded from a graph file. The scenario contains only three
 Bitcoin nodes, connected as shown in the picture:
 
 ![3 node graph](graphs/basic3.png)
