@@ -1,6 +1,6 @@
-from btc_testbed.rpc_utils import *
-from btc_testbed.docker_utils import *
-from btc_testbed.conf import *
+from bitcoin_sandbox.rpc_utils import *
+from bitcoin_sandbox.docker_utils import *
+from bitcoin_sandbox.conf import *
 import logging
 import time
 import networkx as nx

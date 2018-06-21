@@ -1,5 +1,5 @@
-from btc_testbed.conf import *
-from btc_testbed.docker_utils import *
+from bitcoin_sandbox.conf import *
+from bitcoin_sandbox.docker_utils import *
 from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
 import networkx as nx
 
@@ -16,7 +16,7 @@ def rpc_getinfo(client, rpc_server, rpc_user=BTC_RPC_USER, rpc_password=BTC_RPC_
     """
     try:
         rpc_server = get_ip_by_unknown(client, rpc_server)
-        # Test connection by sendinf a getinfo command
+        # Test connection by sending a getinfo command
         rpc_connection = AuthServiceProxy("http://%s:%s@%s:%s" % (rpc_user, rpc_password, rpc_server, rpc_port))
         get_info = rpc_connection.getinfo()
         return get_info

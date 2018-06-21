@@ -1,5 +1,5 @@
 .idea
 *.pyc
 *.log
-conf.py
+bitcoin_sandbox/conf.py
 

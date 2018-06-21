@@ -1,4 +1,4 @@
-from btc_testbed.conf import *
+from bitcoin_sandbox.conf import *
 
 import docker
 import socket
