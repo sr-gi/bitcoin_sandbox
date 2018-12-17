@@ -14,14 +14,13 @@ RUN apt-get install -y bitcoind make
 RUN apt-get install vim -y
 
 # Switch to user bitcoin
-RUN groupadd -r bitcoin && useradd -r -m -g bitcoin bitcoin
 USER bitcoin
 
 # Set the working directory
 WORKDIR /home/bitcoin
 
-# Export port 18332 (see bitcoin.conf)
-EXPOSE 18332
+# Export port 18443 (see bitcoin.conf)
+EXPOSE 18443
 
 # Copy bitcoin.conf to the container
 ADD --chown=bitcoin:bitcoin bitcoin.conf /home/bitcoin/.bitcoin/
