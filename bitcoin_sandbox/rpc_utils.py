@@ -164,7 +164,7 @@ def rpc_call_to_all(client, call, prefix=DOCK_CONTAINER_NAME_PREFIX, arguments=N
         return False
 
 
-def rpcp_get_network_topology(client, mode='ip', out_format='graph', exclude=None):
+def rpcp_get_network_topology(client, mode='ip', out_format='graph', exclude=[]):
     """
     Gets the network topology as a dict.
     :param client: docker client
