@@ -95,16 +95,17 @@ def get_ip_by_unknown(client, host):
     return host
 
 
-def run_new_node(client, network_name=DOCK_NETWORK_NAME, node_num=None):
+def run_new_node(client, network_name=DOCK_NETWORK_NAME, node_num=None, lightning=False):
     """
     Runs a new container.
     :param client: docker client
     :param network_name: docker network name
     :param node_num: node id
+    :param lightning: whether to run lightningd on top of bitcoind or not
     :return:
     """
     containers = client.containers
-    if node_num == None:
+    if node_num is None:
         c = count_containers(client) + 1
         name = DOCK_CONTAINER_NAME_PREFIX + str(c)
         port = {'18332/tcp': 22000 + c}
@@ -112,8 +113,10 @@ def run_new_node(client, network_name=DOCK_NETWORK_NAME, node_num=None):
         name = DOCK_CONTAINER_NAME_PREFIX + str(node_num)
         port = {'18332/tcp': 22000 + node_num}
 
-    containers.run(DOCK_IMAGE_NAME, "bitcoind -debug -datadir=/home/bitcoin/.bitcoin", name=name, ports=port, detach=True, network=network_name)
-    # containers.run("amacneil/bitcoin", "bitcoind", name=name, ports=port, detach=True, network=network_name)
+    containers.run(DOCK_IMAGE_NAME, 'bitcoind', name=name, ports=port, detach=True, network=network_name)
+
+    if lightning:
+        containers.get(name).exec_run('lightningd', detach=True)
 
 
 def run_new_nodes(client, n):
