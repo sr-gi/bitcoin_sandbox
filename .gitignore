@@ -2,4 +2,4 @@
 *.pyc
 *.log
 bitcoin_sandbox/conf.py
-
+test.py
