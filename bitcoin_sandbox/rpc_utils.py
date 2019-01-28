@@ -15,6 +15,7 @@ def rpc_getinfo(client, rpc_server, rpc_user=BTC_RPC_USER, rpc_password=BTC_RPC_
     :return: boolean, whether the connection was successful
     """
     try:
+        print("Warning: getinfo was removed in Bitcoin Core 0.16.0")
         rpc_server = get_ip_by_unknown(client, rpc_server)
         # Test connection by sending a getinfo command
         rpc_connection = AuthServiceProxy("http://%s:%s@%s:%s" % (rpc_user, rpc_password, rpc_server, rpc_port))
