@@ -63,7 +63,7 @@ def create_scenario_from_graph(client, g):
     logging.info("  Graph file contains {} nodes and {} connections".format(len(g.nodes()), len(g.edges())))
 
     for node in g.nodes():
-        run_new_node(client, node_num=node, lightning=True)
+        run_new_node(client, node_num=node)
 
     time.sleep(5)
 

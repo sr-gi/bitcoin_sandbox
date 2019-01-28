@@ -95,7 +95,7 @@ def get_ip_by_unknown(client, host):
     return host
 
 
-def run_new_node(client, network_name=DOCK_NETWORK_NAME, node_num=None, lightning=False):
+def run_new_node(client, network_name=DOCK_NETWORK_NAME, node_num=None):
     """
     Runs a new container.
     :param client: docker client
@@ -114,9 +114,6 @@ def run_new_node(client, network_name=DOCK_NETWORK_NAME, node_num=None, lightnin
         port = {'18332/tcp': 22000 + node_num}
 
     containers.run(DOCK_IMAGE_NAME, 'bitcoind', name=name, ports=port, detach=True, network=network_name)
-
-    if lightning:
-        containers.get(name).exec_run('lightningd', detach=True)
 
 
 def run_new_nodes(client, n):
