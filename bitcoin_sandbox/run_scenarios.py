@@ -4,7 +4,7 @@ from bitcoin_sandbox.conf import *
 import logging
 import time
 import networkx as nx
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from sys import argv
 from getopt import getopt
 
