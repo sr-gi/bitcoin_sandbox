@@ -23,7 +23,7 @@ def create_basic_scenario(client):
     logging.info("  Getting info about existing nodes")
     logging.info("    Nodes are: {}".format(get_containers_names(client)))
     ip1 = get_ip_by_container_name(client, "btc_n1")
-    ip2 =  get_ip_by_container_name(client, "btc_n2")
+    ip2 = get_ip_by_container_name(client, "btc_n2")
     logging.info("    and have ips {} and {}".format(ip1, ip2))
 
     time.sleep(3)
@@ -166,10 +166,10 @@ if __name__ == '__main__':
     # Create a scenario
 
     # Basic scenario: 2 nodes with 1 connection
-    create_basic_scenario(client)
+    # create_basic_scenario(client)
 
     # Scenario from graph: gets topology from graph
-    # create_scenario_from_graph_file(client, TEST_GRAPH_FILE_1)
+    create_scenario_from_graph_file(client, TEST_LN_GRAPH_FILE_1)
 
     # Scenario from a random graph:
     # create_scenario_from_er_graph(client, 5, 0.3)

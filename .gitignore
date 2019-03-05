@@ -1,5 +1,6 @@
 .idea
 *.pyc
 *.log
+.DS_Store
 bitcoin_sandbox/conf.py
 test.py
