@@ -34,7 +34,7 @@ def create_onchain_setup(client, btc_containers):
         logging.info("  running lightningd in node {}".format(node.name))
 
         # Give time to lightningd to start
-        sleep(0.5)
+        sleep(1)
 
         # Generate some bitcoins for every peer so they have balance to fund LN channels
         btc_addr = newaddr(node)
