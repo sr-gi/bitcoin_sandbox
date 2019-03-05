@@ -141,6 +141,7 @@ def create_ln_scenario_from_graph(client, ln_nodes_info, g):
 def build_simulation_env(client):
     # Get all nodes
     btc_containers = [container for container in client.containers.list("all") if 'btc_n' in container.name]
+    btc_containers.reverse()
 
     # Give every node some bitcoins to start with
     btc_addrs = create_onchain_setup(client, btc_containers)
