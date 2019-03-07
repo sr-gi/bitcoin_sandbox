@@ -1,8 +1,10 @@
 from json import loads
-import logging
 
 
 def lightning_rpc(container, command, params=[], verbose=False):
+    if not isinstance(params, list):
+        params = [params]
+
     command = 'lightning-cli ' + command
 
     for param in params:
@@ -11,7 +13,7 @@ def lightning_rpc(container, command, params=[], verbose=False):
     rcode, result = container.exec_run(command)
 
     if verbose:
-        logging.info(" %s, %s" %(container.name, command))
+        print "\t\t\t\t%s, %s" % (container.name, command)
 
     if rcode in [0, None]:
         return loads(result)
