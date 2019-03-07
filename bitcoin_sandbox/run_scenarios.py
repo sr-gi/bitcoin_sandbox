@@ -1,12 +1,14 @@
-from bitcoin_sandbox.rpc_utils import *
 from bitcoin_sandbox.docker_utils import *
 from bitcoin_sandbox.conf import *
+import bitcoin_sandbox.rpc_utils as bitcoin_cli
 import logging
 import time
 import networkx as nx
-# import matplotlib.pyplot as plt
 from sys import argv
 from getopt import getopt
+
+
+from net_utils import get_peer_ips, get_network_topology
 
 
 def create_basic_scenario(client):
@@ -18,7 +20,7 @@ def create_basic_scenario(client):
 
     logging.info("Creating basic scenario")
     logging.info("  Creating 2 new nodes")
-    run_new_nodes(client, 2)
+    target_container, _ = run_new_nodes(client, 2)
 
     logging.info("  Getting info about existing nodes")
     logging.info("    Nodes are: {}".format(get_containers_names(client)))
@@ -28,19 +30,9 @@ def create_basic_scenario(client):
 
     time.sleep(3)
 
-    rpc1 = rpc_test_connection(client, "btc_n1")
-    logging.info("  Testing rpc connection: {}".format(rpc1))
+    bitcoin_cli.addnode(target_container, ip2)
 
-    c1 = rpc_create_connection(client, "btc_n1", "btc_n2")
-    logging.info("  Creating a connection: {}".format(c1))
-
-    time.sleep(3)
-
-    logging.info("  Checking the connection")
-    p1 = rpc_getpeerinfo(client, "btc_n1")
-    p2 = rpc_getpeerinfo(client, "btc_n2")
-    logging.info("    " + str(p1))
-    logging.info("    " + str(p2))
+    # ToDo: ADD TEST
 
 
 def create_scenario_from_graph(client, g):
@@ -55,32 +47,32 @@ def create_scenario_from_graph(client, g):
     :return:
     """
 
-    # Plot graph
-    # nx.draw(g)
-    # plt.draw()
-    # plt.show(block=True)
+    # ToDo: Timers are meant to let bitcoind initialize. It will be good to implement it via signals instead
+    # ToDo: That will imply (most likely) build a service based on debug.log parsing.
 
     logging.info("  Graph file contains {} nodes and {} connections".format(len(g.nodes()), len(g.edges())))
 
-    for node in g.nodes():
-        run_new_node(client, node_num=node)
+    containers = [run_new_node(client, node_num=node) for node in g.nodes()]
 
-    time.sleep(5)
+    time.sleep(10)
 
     for edge in g.edges():
         source = DOCK_CONTAINER_NAME_PREFIX + str(edge[0])
         dest = DOCK_CONTAINER_NAME_PREFIX + str(edge[1])
-        r = rpc_create_connection(client, source, dest)
+        source_container = client.containers.get(source)
+        dest_container = client.containers.get(dest)
+
+        bitcoin_cli.addnode(source_container, get_container_ip(dest_container))
 
     time.sleep(5)
 
-    logging.info("  I have created {} nodes".format(len(get_containers_names(client))))
+    logging.info("  I have created {} nodes".format(len(containers)))
 
-    containers = get_containers_names(client)
-    num_connections = sum([len(rpc_getpeerinfo(client, c)) for c in containers])/2
+    num_connections = sum([len(bitcoin_cli.getpeerinfo(container)) for container in containers])/2
     logging.info("  I have created {} connections".format(num_connections))
 
-    return
+    for container in containers:
+        get_container_ip(container)
 
 
 def create_scenario_from_graph_file(client, graph_file):
@@ -110,7 +102,8 @@ def create_scenario_from_er_graph(client, num_nodes, p):
     """
 
     g = nx.erdos_renyi_graph(num_nodes, p, directed=True)
-    logging.info("Creating scenario with a random topology: {} nodes and {} edges".format(num_nodes, g.number_of_edges()))
+    logging.info("Creating scenario with a random topology: {} nodes and {} edges".format(num_nodes,
+                                                                                          g.number_of_edges()))
     create_scenario_from_graph(client, g)
 
 
@@ -132,12 +125,12 @@ def docker_setup(build_image=True, create_docker_network=True, remove_existing=T
     if build_image:
         logging.info("  Building docker image")
         client.images.build(path=".", tag=DOCK_IMAGE_NAME)
-    if create_docker_network:
-        logging.info("  Creating network")
-        create_network(client)
     if remove_existing:
         logging.info("  Removing existing containers")
         remove_containers(client)
+    if create_docker_network:
+        logging.info("  Creating network")
+        create_network(client, overwrite_net=create_docker_network)
     return client
 
 
@@ -169,7 +162,7 @@ if __name__ == '__main__':
     # create_basic_scenario(client)
 
     # Scenario from graph: gets topology from graph
-    create_scenario_from_graph_file(client, TEST_LN_GRAPH_FILE_1)
+    create_scenario_from_graph_file(client, BITCOIN_GRAPH_FILE)
 
     # Scenario from a random graph:
     # create_scenario_from_er_graph(client, 5, 0.3)
