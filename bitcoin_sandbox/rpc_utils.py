@@ -38,8 +38,6 @@ def getnetworkinfo(container):
     return bitcoin_rpc(container, 'getnetworkinfo')
 
 
-# TEST THIS ONES
-
 def generate(container, n):
     return bitcoin_rpc(container, 'generate', n)
 

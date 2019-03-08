@@ -8,9 +8,6 @@ from sys import argv
 from getopt import getopt
 
 
-from net_utils import get_peer_ips, get_network_topology
-
-
 def create_basic_scenario(client):
     """
     Creates a basic network with 2 nodes and 1 connection from node 1 to node 2

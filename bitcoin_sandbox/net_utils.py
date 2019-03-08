@@ -1,6 +1,6 @@
 import bitcoin_sandbox.rpc_utils as bitcoin_cli
 import networkx as nx
-from docker_utils import get_container_ip, get_container_name_by_ip
+from docker_utils import get_container_ip
 
 
 def get_peer_ips(container):

@@ -60,7 +60,6 @@ def get_container_ip(container, network_name=DOCK_NETWORK_NAME):
     :return
     """
 
-    print container.name, str(container.attrs['NetworkSettings']['Networks'][network_name]['IPAddress'])
     return str(container.attrs['NetworkSettings']['Networks'][network_name]['IPAddress'])
 
 
