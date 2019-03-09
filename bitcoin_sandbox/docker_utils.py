@@ -1,5 +1,4 @@
 from bitcoin_sandbox.conf import *
-
 import docker
 import socket
 import logging
