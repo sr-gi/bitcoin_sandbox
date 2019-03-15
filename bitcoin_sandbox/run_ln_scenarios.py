@@ -90,9 +90,13 @@ def create_ln_scenario_from_graph(btc_containers, btc_addrs, g):
     logging.info("  Graph file contains {} nodes and {} connections".format(len(g.nodes()), len(g.edges())))
     funding_txids = set()
 
-    for edge in g.edges():
-        source = DOCK_CONTAINER_NAME_PREFIX + str(edge[0])
-        dst = DOCK_CONTAINER_NAME_PREFIX + str(edge[1])
+    for edge in g.edges(data=True):
+        source, dst, meta = edge
+        source = DOCK_CONTAINER_NAME_PREFIX + str(source)
+        dst = DOCK_CONTAINER_NAME_PREFIX + str(dst)
+
+        weight = int(meta.get("weight"))
+        weight = DEFAULT_LN_GRAPH_WEIGHT if weight is None else weight
 
         source_container = btc_containers.get(source)
         dst_info = ln_nodes_info.get(dst)
@@ -104,7 +108,7 @@ def create_ln_scenario_from_graph(btc_containers, btc_addrs, g):
 
         # Open channel
         logging.info("  funding channel: {} --> {}".format(source, dst))
-        channel_info = lightning_cli.fundchannel(source_container, dst_info.id, 10000)
+        channel_info = lightning_cli.fundchannel(source_container, dst_info.id, weight)
         logging.info("      channel id: {}".format(channel_info.get('channel_id')))
         funding_txids.add(channel_info.get('txid'))
 
