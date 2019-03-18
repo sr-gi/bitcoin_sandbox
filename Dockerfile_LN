@@ -2,25 +2,19 @@
 FROM ubuntu:14.04
 
 # Update the package list and install software properties common.
-RUN apt-get update && apt-get install -y software-properties-common autoconf automake build-essential git libtool libgmp-dev libsqlite3-dev python python3 net-tools zlib1g-dev
+RUN apt-get update && apt-get install -y software-properties-common autoconf automake build-essential git libtool libgmp-dev libsqlite3-dev python python3 net-tools zlib1g-dev vim
 
 # Add bitcoind from the official PPA
 RUN add-apt-repository --yes ppa:bitcoin/bitcoin && apt-get update
 
-# Install bitcoind and make
-RUN apt-get install -y bitcoind make
+# Same for LN
+RUN add-apt-repository ppa:lightningnetwork/ppa && sudo apt-get update
 
-# Install additional packages
-RUN apt-get install vim -y
+# Install bitcoind
+RUN apt-get install -y bitcoind
 
 # Install LN
-RUN git clone https://github.com/ElementsProject/lightning.git
-
-ADD --chown=bitcoin:bitcoin Makefile /lightning
-
-RUN	cd lightning \
-	&& ./configure \
-	&& make install
+RUN apt-get install -y lightningd
 
 # Set the working directory
 WORKDIR /var/lib/bitcoin/
