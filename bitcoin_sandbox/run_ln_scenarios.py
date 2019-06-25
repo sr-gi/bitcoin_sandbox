@@ -1,5 +1,5 @@
 import bitcoin_sandbox.rpc_utils as bitcoin_cli
-import bitcoin_sandbox.ln_rpc_utils as lightning_cli
+import bitcoin_sandbox.ln_rpc_utils as lncli
 import networkx as nx
 from time import sleep
 from bitcoin_sandbox.docker_utils import *
@@ -10,6 +10,7 @@ def get_address_from_info(info, version='ipv4'):
     ip = None
     port = None
     addresses = info.get('address')
+    print(addresses)
 
     for address in addresses:
         if address.get('type') == version:
@@ -27,15 +28,15 @@ def create_onchain_setup(btc_containers):
     btc_addrs = {}
 
     for node in btc_containers:
-        # Run lightningd in every container
-        node.exec_run('lightningd', detach=True)
-        logging.info("  running lightningd in node {}".format(node.name))
+        # Run lnd in every container
+        node.exec_run('lnd', detach=True)
+        logging.info("  running lnd in node {}".format(node.name))
 
-        # Give time to lightningd to start
-        sleep(2)
+        # Give time to lnd to start
+        sleep(4)
 
         # Generate some bitcoins for every peer so they have balance to fund LN channels
-        btc_addr = lightning_cli.newaddr(node)
+        btc_addr = lncli.newaddress(node)
 
         # Generate some bitcoins for every peer so they have balance to fund LN channels
         logging.info("  generating a new address for node {}: {}".format(node.name, btc_addr))
@@ -45,8 +46,8 @@ def create_onchain_setup(btc_containers):
 
         btc_addrs[node.name] = btc_addr
 
-    # Generate 100 blocks on top of this so all funds are mature (we can give this to the first node, it doesn't matter)
-    bitcoin_cli.generate(btc_containers[0], 100)
+    # Generate 100 blocks on top of this so all funds are mature (we can give this to the last address, does not matter)
+    bitcoin_cli.generatetoaddress(btc_containers[0], 100, btc_addr)
     logging.info("  generating 100 additional blocks so all the previous funds are mature")
 
     return btc_addrs
@@ -56,10 +57,12 @@ def get_ln_nodes_info(btc_containers, btc_addrs):
     ln_node_info = {}
 
     for node in btc_containers:
-        raw_info = lightning_cli.getinfo(node)
+        raw_info = lncli.getinfo(node)
 
-        ln_node_id = raw_info.get('id')
-        ln_node_ip, ln_node_port = get_address_from_info(raw_info)
+        ln_node_id = raw_info.get('identity_pubkey')
+        ln_node_ip = get_container_ip(node)
+        # ToDo: Hardcoded port, maybe param in a future?
+        ln_node_port = '9735'
         ln_node_btc_addr = btc_addrs[node.name]
 
         ln_node = LN_Node(node_id=ln_node_id, ip=ln_node_ip, port=ln_node_port, btc_addr=ln_node_btc_addr)
@@ -73,12 +76,12 @@ def wait_until_mature(btc_containers):
     notified = False
 
     while not all_available:
-        funds = [lightning_cli.listfunds(node).get("outputs") for node in btc_containers]
+        funds = [lncli.listunspent(node).get("outputs") for node in btc_containers]
         all_available = all(out != [] for out in funds)
 
         if not all_available:
             if not notified:
-                logging.info("  waiting for funds to show up in lightningd")
+                logging.info("  waiting for funds to show up in lnd")
                 notified = True
             sleep(5)
 
@@ -103,14 +106,13 @@ def create_ln_scenario_from_graph(btc_containers, btc_addrs, g):
 
         # Create connection
         logging.info("  creating LN connection ({}, {})".format(source, dst))
-        peer_id = lightning_cli.connect(source_container, dst_info.id, dst_info.ip, dst_info.port)
-        logging.info("      peer id: {}".format(peer_id))
+        lncli.connect(source_container, dst_info.id, dst_info.ip, dst_info.port)
+        logging.info("      peer id: {}".format(dst_info.id))
 
         # Open channel
         logging.info("  funding channel: {} --> {}".format(source, dst))
-        channel_info = lightning_cli.fundchannel(source_container, dst_info.id, weight)
-        logging.info("      channel id: {}".format(channel_info.get('channel_id')))
-        funding_txids.add(channel_info.get('txid'))
+        funding_txid = lncli.openchannel(source_container, dst_info.id, weight)
+        funding_txids.add(funding_txid)
 
     # Give some time to the funding transactions to propagate
     logging.info("  waiting until funding transactions have been spread")
@@ -123,7 +125,7 @@ def create_ln_scenario_from_graph(btc_containers, btc_addrs, g):
             sleep(2)
 
     # Generate more blocks so funding transaction is locked (to node 0)
-    bitcoin_cli.generate(btc_containers.values()[0], 6)
+    bitcoin_cli.generatetoaddress(btc_containers.values()[0], 6, btc_addrs.values()[0])
     logging.info("  generating 6 additional blocks to lock funding transaction")
 
 
@@ -141,7 +143,7 @@ def build_simulation_env(client):
     # Give every node some bitcoins to start with
     btc_addrs = create_onchain_setup(btc_containers.values())
 
-    # Wait until lightningd has processed all new blocks so funds show up in every node
+    # Wait until lnd has processed all new blocks so funds show up in every node
     wait_until_mature(btc_containers.values())
 
     # Run the LN nodes on top of bitcoind

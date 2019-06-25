@@ -5,7 +5,7 @@ def lightning_rpc(container, command, params=[], verbose=False):
     if not isinstance(params, list):
         params = [params]
 
-    command = 'lightning-cli ' + command
+    command = 'lncli --no-macaroons ' + command
 
     for param in params:
         command += ' ' + str(param)
@@ -29,17 +29,17 @@ def getinfo(container):
     return lightning_rpc(container, 'getinfo')
 
 
-def newaddr(container):
-    return lightning_rpc(container, 'newaddr').get('address')
+def newaddress(container):
+    return lightning_rpc(container, 'newaddress', 'p2wkh').get('address')
 
 
 def connect(container, peer_id, peer_ip, peer_port):
-    return lightning_rpc(container, 'connect', [peer_id, peer_ip, peer_port]).get('id')
+    return lightning_rpc(container, 'connect', '{}@{}:{}'.format(peer_id, peer_ip, peer_port)).get('id')
 
 
-def fundchannel(container, peer_id, amount):
-    return lightning_rpc(container, 'fundchannel', [peer_id, amount])
+def openchannel(container, peer_id, amount):
+    return lightning_rpc(container, 'openchannel', [peer_id, amount]).get('funding_txid')
 
 
-def listfunds(container):
-    return lightning_rpc(container, 'listfunds')
+def listunspent(container):
+    return lightning_rpc(container, 'listunspent')

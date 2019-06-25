@@ -11,6 +11,7 @@ def get_containers_names(client, prefix=DOCK_CONTAINER_NAME_PREFIX):
     :param prefix: string, prefix used in the containers names
     :return: list of strings with container names
     """
+
     return [str(container.name) for container in client.containers.list("all") if prefix in container.name]
 
 
@@ -21,6 +22,7 @@ def count_containers(client, prefix=DOCK_CONTAINER_NAME_PREFIX):
     :param prefix: string, prefix used in the containers names
     :return: number of containers with the specified prefix
     """
+
     containers = get_containers_names(client)
     return sum([1 for c in containers if prefix in c])
 
@@ -32,6 +34,7 @@ def remove_container_by_name(client, container_name):
     :param container_name: name of the container to remove.
     :return: boolean
     """
+
     try:
         client.containers.get(container_name).stop()
         return client.containers.get(container_name).remove()
@@ -46,6 +49,7 @@ def remove_containers(client, prefix=DOCK_CONTAINER_NAME_PREFIX):
     :param prefix: string, prefix used in the containers names
     :return:
     """
+
     containers = get_containers_names(client)
     for c in containers:
         if prefix in c:
@@ -71,6 +75,7 @@ def get_ip_by_container_name(client, container_name, network_name=DOCK_NETWORK_N
     :param network_name: docker network name
     :return: ip address
     """
+
     try:
         container = client.containers.get(container_name)
     except docker.errors.NotFound:
@@ -85,6 +90,7 @@ def is_valid_ip(addr):
     :param addr: string to check
     :return: boolean, whether the string is a valid IP address.
     """
+
     try:
         socket.inet_aton(addr)
     except socket.error:
@@ -99,6 +105,7 @@ def get_ip_by_unknown(client, host):
     :param host: container name or ip
     :return: ip address
     """
+
     if not is_valid_ip(host):
         # If it is not an ip, assume it's a container name:
         host = get_ip_by_container_name(client, host)
@@ -113,6 +120,7 @@ def run_new_node(client, network_name=DOCK_NETWORK_NAME, node_num=None):
     :param node_num: node id
     :return:
     """
+
     containers = client.containers
     if node_num is None:
         c = count_containers(client) + 1
@@ -148,6 +156,8 @@ def create_network(client, overwrite_net=False, network_name=DOCK_NETWORK_NAME, 
     Creates a docker network.
     :param client: docker client
     :param network_name: docker network name
+    :param: subnetwork: network were the node will be connected to (usually virtual docker network)
+    :param: gw: network gateway
     """
 
     if overwrite_net:

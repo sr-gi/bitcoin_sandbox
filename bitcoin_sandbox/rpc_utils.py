@@ -38,10 +38,6 @@ def getnetworkinfo(container):
     return bitcoin_rpc(container, 'getnetworkinfo')
 
 
-def generate(container, n):
-    return bitcoin_rpc(container, 'generate', n)
-
-
 def generatetoaddress(container, n, btc_address):
     block_ids = bitcoin_rpc(container, 'generatetoaddress', [n, btc_address])
 

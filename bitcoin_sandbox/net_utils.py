@@ -10,6 +10,7 @@ def get_peer_ips(container):
     :param container: target node to get peers from
     :return: list of tuples, each tuple has (IP, inbound?)
     """
+
     peerinfo = bitcoin_cli.getpeerinfo(container)
     peer_ips = []
 
