@@ -1,4 +1,0 @@
-log-level=debug
-network=regtest
-bitcoin-rpcuser=uab
-bitcoin-rpcpassword=uabpassword

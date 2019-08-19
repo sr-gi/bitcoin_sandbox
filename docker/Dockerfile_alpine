@@ -24,9 +24,7 @@ RUN apk update \
 	&& rm -rf /glibc-${GLIBC_VERSION}.apk \
 	&& rm -rf /glibc-bin-${GLIBC_VERSION}.apk
 
-USER bitcoin
-
-WORKDIR /home/bitcoin
-ADD --chown=bitcoin:bitcoin bitcoin.conf /home/bitcoin/.bitcoin/
+WORKDIR /root
+ADD bitcoin.conf .bitcoin/
 
 EXPOSE 18443
