@@ -41,7 +41,8 @@ def create_onchain_setup(btc_containers):
         # Generate some bitcoins for every peer so they have balance to fund LN channels
         logging.info("  generating a new address for node {}: {}".format(node.name, btc_addr))
 
-        block_id = str(bitcoin_cli.generatetoaddress(node, 1, btc_addr)[0])
+        # FIXME: Running a not meshnet seems to have problems with first block propagation. Setting it to 2 for now
+        block_id = str(bitcoin_cli.generatetoaddress(node, 2, btc_addr)[0])
         logging.info("  new block mined: {}. Reward sent to {}".format(block_id, btc_addr))
 
         btc_addrs[node.name] = btc_addr
@@ -76,7 +77,7 @@ def wait_until_mature(btc_containers):
     notified = False
 
     while not all_available:
-        funds = [lncli.listunspent(node).get("outputs") for node in btc_containers]
+        funds = [lncli.listunspent(node).get("utxos") for node in btc_containers]
         all_available = all(out != [] for out in funds)
 
         if not all_available:

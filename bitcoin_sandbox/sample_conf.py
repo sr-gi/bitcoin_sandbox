@@ -6,13 +6,13 @@ DOCK_NETWORK_SUBNET = '172.192.1.0/24'
 DOCK_NETWORK_GW = '172.192.1.1'
 DOCK_CONTAINER_NAME_PREFIX = 'btc_n'
 DOCK_IMAGE_NAME = 'sandbox_ln'
-DOCKER_INI_PORT_MAPPING = 22004
+DOCKER_INI_PORT_MAPPING = 22000
 
 # Log
 LOG_FILE = 'bitcoin_sandbox.log'
 
 # Graphs
-BITCOIN_GRAPH_FILE = './graphs/basic_mesh.graphml'
-LN_GRAPH_FILE = './graphs/basic_ln.graphml'
+BITCOIN_GRAPH_FILE = './graphs/basic3.graphml'
+LN_GRAPH_FILE = './graphs/basic3_ln.graphml'
 DEFAULT_LN_GRAPH_WEIGHT = 10000
 
