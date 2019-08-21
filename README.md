@@ -24,6 +24,8 @@ a connection between any two nodes).
 The ln branch builds on top of the deployment of the master branch (i.e. must be run after running `run_scenarios.py`)
 
 If you haven't deployed the onchain scenario, check [Running the testbed in master.](https://github.com/sr-gi/bitcoin_sandbox/blob/master/README.md#running-the-testbed)
+Have in mind that it would be better to build a scenario based on a mesh or fully connected network to avoid synchronization 
+issues (`sample_conf.py` in this branch builds using `basic4_mesh.graphml`).
 
 Once deployed, you can run the lightning network scenario by running:
 

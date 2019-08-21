@@ -12,7 +12,7 @@ DOCKER_INI_PORT_MAPPING = 22000
 LOG_FILE = 'bitcoin_sandbox.log'
 
 # Graphs
-BITCOIN_GRAPH_FILE = './graphs/basic3.graphml'
-LN_GRAPH_FILE = './graphs/basic3_ln.graphml'
+BITCOIN_GRAPH_FILE = './graphs/basic4_mesh.graphml'
+LN_GRAPH_FILE = './graphs/basic4_ln.graphml'
 DEFAULT_LN_GRAPH_WEIGHT = 10000
 

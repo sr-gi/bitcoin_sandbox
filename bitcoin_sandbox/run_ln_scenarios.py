@@ -41,7 +41,7 @@ def create_onchain_setup(btc_containers):
         # Generate some bitcoins for every peer so they have balance to fund LN channels
         logging.info("  generating a new address for node {}: {}".format(node.name, btc_addr))
 
-        # FIXME: Running a not meshnet seems to have problems with first block propagation. Setting it to 2 for now
+        # FIXME: Running a not meshnet seems to have problems with information propagation.
         block_id = str(bitcoin_cli.generatetoaddress(node, 2, btc_addr)[0])
         logging.info("  new block mined: {}. Reward sent to {}".format(block_id, btc_addr))
 
