@@ -45,7 +45,6 @@ ADD bitcoin.conf .bitcoin/
 RUN go get -d github.com/lightningnetwork/lnd
 
 RUN cd go/src/github.com/lightningnetwork/lnd \
-    && sed -i "s/.*defaultTrickleDelay.*=.*/        defaultTrickleDelay=2*1000/" config.go \
     && make \
     && make install
 
