@@ -125,10 +125,12 @@ def run_new_node(client, network_name=DOCK_NETWORK_NAME, node_num=None):
     if node_num is None:
         c = count_containers(client) + 1
         name = DOCK_CONTAINER_NAME_PREFIX + str(c)
-        port = {'18332/tcp': DOCKER_INI_PORT_MAPPING + c, '18443/tcp': DOCKER_RPC_PORT_MAPPING + c}
+        port = {'18332/tcp': DOCKER_INI_PORT_MAPPING + c, '18443/tcp': DOCKER_RPC_PORT_MAPPING + c,
+                '28332/tcp': DOCKER_ZMQ_BLOCK_PORT_MAPPING + c}
     else:
         name = DOCK_CONTAINER_NAME_PREFIX + str(node_num)
-        port = {'18332/tcp': DOCKER_INI_PORT_MAPPING + node_num, '18443/tcp': DOCKER_RPC_PORT_MAPPING + node_num}
+        port = {'18332/tcp': DOCKER_INI_PORT_MAPPING + node_num, '18443/tcp': DOCKER_RPC_PORT_MAPPING + node_num,
+                '28332/tcp': DOCKER_ZMQ_BLOCK_PORT_MAPPING + node_num}
 
     node = containers.run(DOCK_IMAGE_NAME, 'bitcoind', name=name, ports=port, detach=True, network=network_name)
     # The returned container has an undefined IP (it's assigned by the network manager after creation)
