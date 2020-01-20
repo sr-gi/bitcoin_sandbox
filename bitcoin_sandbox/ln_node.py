@@ -6,5 +6,6 @@ class LN_Node:
         self.btc_addr = btc_addr
 
     def toString(self):
-        return "(node_id: %s, ip: %s, port: %s, btc_addr: %s)" % (str(self.id), str(self.ip), str(self.port),
-                                                                  str(self.btc_addr))
+        return "(node_id: {}, ip: {}, port: {}, btc_addr: {})".format(
+            str(self.id), str(self.ip), str(self.port), str(self.btc_addr)
+        )

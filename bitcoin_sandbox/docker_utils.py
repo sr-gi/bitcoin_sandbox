@@ -1,7 +1,8 @@
-from bitcoin_sandbox.conf import *
 import docker
 import socket
 import logging
+
+from bitcoin_sandbox.conf import *
 
 
 def get_containers_names(client, prefix=DOCK_CONTAINER_NAME_PREFIX):
@@ -64,7 +65,7 @@ def get_container_ip(container, network_name=DOCK_NETWORK_NAME):
     :return
     """
 
-    return str(container.attrs['NetworkSettings']['Networks'][network_name]['IPAddress'])
+    return str(container.attrs["NetworkSettings"]["Networks"][network_name]["IPAddress"])
 
 
 def get_ip_by_container_name(client, container_name, network_name=DOCK_NETWORK_NAME):
@@ -125,11 +126,14 @@ def run_new_node(client, network_name=DOCK_NETWORK_NAME, node_num=None):
         node_num = count_containers(client) + 1
 
     name = DOCK_CONTAINER_NAME_PREFIX + str(node_num)
-    port = {'18332/tcp': DOCKER_INI_PORT_MAPPING + node_num, '18443/tcp': DOCKER_RPC_PORT_MAPPING + node_num,
-            '28332/tcp': DOCKER_ZMQ_BLOCK_PORT_MAPPING + node_num}
+    port = {
+        "18332/tcp": DOCKER_INI_PORT_MAPPING + node_num,
+        "18443/tcp": DOCKER_RPC_PORT_MAPPING + node_num,
+        "28332/tcp": DOCKER_ZMQ_BLOCK_PORT_MAPPING + node_num,
+    }
 
     containers = client.containers
-    node = containers.run(DOCK_IMAGE_NAME, 'bitcoind', name=name, ports=port, detach=True, network=network_name)
+    node = containers.run(DOCK_IMAGE_NAME, "bitcoind", name=name, ports=port, detach=True, network=network_name)
     # The returned container has an undefined IP (it's assigned by the network manager after creation)
     node = client.containers.get(node.name)
 
@@ -149,8 +153,9 @@ def run_new_nodes(client, n):
     return nodes
 
 
-def create_network(client, overwrite_net=False, network_name=DOCK_NETWORK_NAME, subnetwork=DOCK_NETWORK_SUBNET,
-                   gw=DOCK_NETWORK_GW):
+def create_network(
+    client, overwrite_net=False, network_name=DOCK_NETWORK_NAME, subnetwork=DOCK_NETWORK_SUBNET, gw=DOCK_NETWORK_GW
+):
     """
     Creates a docker network.
     :param overwrite_net: Whether the network should overwrite any existing network with the same name

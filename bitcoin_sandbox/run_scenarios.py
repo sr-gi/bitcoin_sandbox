@@ -1,11 +1,12 @@
-from bitcoin_sandbox.docker_utils import *
-from bitcoin_sandbox.conf import *
-import bitcoin_sandbox.rpc_utils as bitcoin_cli
-import logging
 import time
-import networkx as nx
+import logging
 from sys import argv
+import networkx as nx
 from getopt import getopt
+
+import bitcoin_sandbox.conf as conf
+from bitcoin_sandbox.docker_utils import *
+import bitcoin_sandbox.rpc_utils as bitcoin_cli
 
 
 def create_basic_scenario(client):
@@ -63,8 +64,8 @@ def create_scenario_from_graph(client, g):
 
     logging.info("  I have created {} nodes".format(len(containers)))
 
-    num_connections = sum([len(bitcoin_cli.getpeerinfo(container)) for container in containers])/2
-    logging.info("  I have created {} connections".format(num_connections))
+    num_connections = sum([len(bitcoin_cli.getpeerinfo(container)) for container in containers]) / 2
+    logging.info("  I have created {} connections".format(int(num_connections)))
 
     for container in containers:
         get_container_ip(container)
@@ -97,8 +98,9 @@ def create_scenario_from_er_graph(client, num_nodes, p):
     """
 
     g = nx.erdos_renyi_graph(num_nodes, p, directed=True)
-    logging.info("Creating scenario with a random topology: {} nodes and {} edges".format(num_nodes,
-                                                                                          g.number_of_edges()))
+    logging.info(
+        "Creating scenario with a random topology: {} nodes and {} edges".format(num_nodes, g.number_of_edges())
+    )
     create_scenario_from_graph(client, g)
 
 
@@ -115,7 +117,7 @@ def docker_setup(build_image=True, create_docker_network=True, remove_existing=T
     :return: docker client
     """
 
-    logging.info('Setting up docker client')
+    logging.info("Setting up docker client")
     client = docker.from_env()
     if build_image:
         logging.info("  Building docker image")
@@ -129,24 +131,25 @@ def docker_setup(build_image=True, create_docker_network=True, remove_existing=T
     return client
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     if len(argv) > 1:
         # Get params from call
-        _, args = getopt(argv, ['nobuild', 'nonet'])
-        build = False if '--nobuild' in args else True
-        network = False if '--nonet' in args else True
-        remove = False if '--noremove' in args else True
+        _, args = getopt(argv, ["nobuild", "nonet"])
+        build = False if "--nobuild" in args else True
+        network = False if "--nonet" in args else True
+        remove = False if "--noremove" in args else True
     else:
         build = True
         network = True
         remove = True
 
     # Configure logging
-    logging.basicConfig(format='%(asctime)s %(name)s: %(message)s', level=logging.INFO, handlers=[
-        logging.FileHandler(LOG_FILE),
-        logging.StreamHandler()
-    ])
+    logging.basicConfig(
+        format="%(asctime)s %(name)s: %(message)s",
+        level=logging.INFO,
+        handlers=[logging.FileHandler(conf.LOG_FILE), logging.StreamHandler()],
+    )
 
     # Create docker client & network
     client = docker_setup(build_image=build, create_docker_network=network, remove_existing=remove)
@@ -157,7 +160,7 @@ if __name__ == '__main__':
     # create_basic_scenario(client)
 
     # Scenario from graph: gets topology from graph
-    create_scenario_from_graph_file(client, BITCOIN_GRAPH_FILE)
+    create_scenario_from_graph_file(client, conf.BITCOIN_GRAPH_FILE)
 
     # Scenario from a random graph:
     # create_scenario_from_er_graph(client, 5, 0.3)
