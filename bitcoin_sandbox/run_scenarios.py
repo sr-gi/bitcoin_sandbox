@@ -1,6 +1,6 @@
-from bitcoin_sandbox.docker_utils import *
-from bitcoin_sandbox.conf import *
-import bitcoin_sandbox.rpc_utils as bitcoin_cli
+from docker_utils import *
+from conf import *
+import rpc_utils as bitcoin_cli
 import logging
 import time
 import networkx as nx

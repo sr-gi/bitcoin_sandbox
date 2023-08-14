@@ -1,4 +1,4 @@
-from bitcoin_sandbox.conf import *
+from conf import *
 import docker
 import socket
 import logging

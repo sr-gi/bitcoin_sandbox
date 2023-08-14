@@ -1,7 +1,7 @@
 from json import loads
 
 
-def bitcoin_rpc(container, command, params=[], verbose=False):
+def bitcoin_rpc(container, command, params=[], verbose=True):
     if not isinstance(params, list):
         params = [params]
 
@@ -11,12 +11,11 @@ def bitcoin_rpc(container, command, params=[], verbose=False):
         command += ' ' + str(param)
 
     rcode, result = container.exec_run(command)
-
     if verbose:
-        print "\t\t\t\t%s, %s" % (container.name, command)
+        print("\t\t\t\t%s, %s" % (container.name, command))
 
     if rcode in [0, None]:
-        if result not in [None, ""]:
+        if result not in [None, "", b'']:
             return loads(result)
     else:
         raise Exception(result, rcode)
